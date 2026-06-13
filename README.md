@@ -1,5 +1,7 @@
 # ETE — Company & Product Management
 
+[![CI](https://github.com/DuyguKamalak/ete-react-assignment/actions/workflows/ci.yml/badge.svg)](https://github.com/DuyguKamalak/ete-react-assignment/actions/workflows/ci.yml)
+
 A full-stack application for managing companies and their products. It features JWT
 authentication, a live statistics dashboard, and full CRUD with sorting, filtering,
 searching, pagination and CSV export.
