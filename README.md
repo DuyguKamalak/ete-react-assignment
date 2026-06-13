@@ -54,15 +54,33 @@ Built as a technical assignment, covering every required feature plus all listed
 
 ---
 
-## Installation & Setup
+## Option A — Run everything with Docker (one command)
+
+This builds the frontend, backend and database, runs the migrations, seeds demo
+data, and serves the whole app behind nginx:
+
+```bash
+git clone https://github.com/DuyguKamalak/ete-react-assignment.git
+cd ete-react-assignment
+docker-compose up --build
+```
+
+- App → http://localhost:8080
+- API → http://localhost:4000
+
+Log in with the seeded demo account (`admin` / `admin123`) or register a new one.
+
+---
+
+## Option B — Local development
 
 ```bash
 # 1. Clone and enter the project
 git clone https://github.com/DuyguKamalak/ete-react-assignment.git
 cd ete-react-assignment
 
-# 2. Start PostgreSQL
-docker-compose up -d
+# 2. Start only PostgreSQL in Docker
+docker-compose up -d postgres
 
 # 3. Configure the backend environment
 cp server/.env.example server/.env
@@ -72,27 +90,18 @@ npm install
 
 # 5. Seed demo data (creates the admin user + sample companies/products)
 npm run seed
-```
 
----
-
-## Running the Application
-
-```bash
+# 6. Run backend + frontend together
 npm run dev
 ```
 
 - Frontend → http://localhost:5173
 - Backend API → http://localhost:4000
 
-Log in with the seeded demo account:
-
-```
-username: admin
-password: admin123
-```
-
-You can also register a new account from the Register tab.
+> **Database schema:** In local development the schema is auto-synced from the
+> Sequelize models. The Docker image instead applies versioned **migrations**
+> (`server/migrations`) and **seeders** (`server/seeders`) via `sequelize-cli` —
+> run them manually with `npm run db:migrate` and `npm run db:seed` if needed.
 
 ---
 
@@ -144,6 +153,12 @@ PostgreSQL is required to execute the tests**.
 
 - **Environment-aware database**: PostgreSQL in development/production, and an
   in-memory SQLite database for tests — giving fast, isolated, dependency-free tests.
+  The Docker image manages the schema with versioned **Sequelize migrations** and
+  **seeders** (idempotent), rather than model auto-sync.
+
+- **Containerized**: multi-stage Dockerfiles build a slim backend image and an
+  nginx-served frontend; a single `docker-compose up` brings up the database,
+  runs migrations + seeders, and serves the app.
 
 - **Server state with TanStack Query** on the frontend handles fetching, caching and
   cache invalidation. Mutations invalidate the relevant queries, so the dashboard and
@@ -169,6 +184,9 @@ ete-react-assignment/
 │       ├── pages/               # Login, Dashboard, Companies, Products
 │       └── utils/               # CSV export helper
 ├── server/                      # Express + TypeScript + Sequelize
+│   ├── migrations/              # Sequelize CLI schema migrations
+│   ├── seeders/                 # Sequelize CLI demo-data seeders
+│   ├── Dockerfile               # Multi-stage backend image
 │   └── src/
 │       ├── config/              # Environment configuration
 │       ├── controllers/         # HTTP handlers
@@ -178,6 +196,6 @@ ete-react-assignment/
 │       ├── routes/              # Route definitions
 │       ├── services/            # Business logic
 │       └── validators/          # Zod schemas
-├── docker-compose.yml           # PostgreSQL service
+├── docker-compose.yml           # PostgreSQL + backend + frontend
 └── package.json                 # npm workspaces root
 ```

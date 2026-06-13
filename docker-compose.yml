@@ -17,5 +17,36 @@ services:
       timeout: 5s
       retries: 5
 
+  server:
+    build: ./server
+    container_name: ete-server
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DB_SYNC: "false"
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ete_db
+      DB_USER: ete_user
+      DB_PASSWORD: ete_password
+      JWT_SECRET: docker-demo-secret-change-me
+      JWT_EXPIRES_IN: 1d
+      CLIENT_ORIGIN: http://localhost:8080
+    ports:
+      - "4000:4000"
+
+  client:
+    build: ./client
+    container_name: ete-client
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "8080:80"
+
 volumes:
   postgres-data:
