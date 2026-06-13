@@ -1,35 +1,181 @@
 # ETE — Company & Product Management
 
-A full-stack application for managing companies and their products, featuring JWT
+A full-stack application for managing companies and their products. It features JWT
 authentication, a live statistics dashboard, and full CRUD with sorting, filtering,
-searching and pagination.
+searching, pagination and CSV export.
 
-> Full setup, run and architecture documentation will be completed as the project
-> progresses. See the plan below for the intended scope.
+Built as a technical assignment, covering every required feature plus all listed bonuses.
+
+---
 
 ## Tech Stack
 
-- **Frontend:** React 18, TypeScript, Vite, Ant Design v5, React Router, TanStack Query
-- **Backend:** Node.js, Express, TypeScript, Sequelize ORM
-- **Database:** PostgreSQL 16 (via Docker Compose)
-- **Auth:** JWT + bcrypt
-- **Testing:** Jest (backend), Vitest (frontend)
+| Layer     | Technologies                                                            |
+| --------- | ----------------------------------------------------------------------- |
+| Frontend  | React 18, TypeScript, Vite, Ant Design v5, React Router, TanStack Query, Recharts |
+| Backend   | Node.js, Express, TypeScript, Sequelize ORM                             |
+| Database  | PostgreSQL 16 (via Docker Compose)                                       |
+| Auth      | JWT (`jsonwebtoken`) + `bcryptjs`                                        |
+| Testing   | Jest + supertest (backend), Vitest + React Testing Library (frontend)   |
+
+---
+
+## Features
+
+**Core**
+
+- Login / Register with JWT authentication
+- Dashboard with dynamic statistics (totals, latest companies) and charts
+- Companies table — full CRUD (Name, Legal Number, Incorporation Country, Website)
+- Products table — full CRUD (Name, Category, Amount, Amount Unit, Company relation)
+
+**Bonuses implemented**
+
+- ✅ Table sorting, filtering, searching and pagination
+- ✅ Node.js + Express backend serving all data
+- ✅ PostgreSQL with Sequelize ORM (relational schema, FK + cascade)
+- ✅ Unit & integration tests (backend and frontend)
+- ✅ JWT token authentication with hashed passwords
+- ✅ TypeScript across the entire stack
+- ✅ Extra features: live dashboard charts, dark/light theme, CSV export,
+  responsive layout, toast notifications, confirmation dialogs
+
+---
+
+## Prerequisites
+
+- **Node.js** >= 18
+- **Docker** + Docker Compose (for PostgreSQL)
+
+> Don't have Docker? Any local PostgreSQL 16 instance works — just point the
+> `server/.env` values at it.
+
+---
+
+## Installation & Setup
+
+```bash
+# 1. Clone and enter the project
+git clone https://github.com/DuyguKamalak/ete-react-assignment.git
+cd ete-react-assignment
+
+# 2. Start PostgreSQL
+docker-compose up -d
+
+# 3. Configure the backend environment
+cp server/.env.example server/.env
+
+# 4. Install all dependencies (npm workspaces)
+npm install
+
+# 5. Seed demo data (creates the admin user + sample companies/products)
+npm run seed
+```
+
+---
+
+## Running the Application
+
+```bash
+npm run dev
+```
+
+- Frontend → http://localhost:5173
+- Backend API → http://localhost:4000
+
+Log in with the seeded demo account:
+
+```
+username: admin
+password: admin123
+```
+
+You can also register a new account from the Register tab.
+
+---
+
+## Running Tests
+
+```bash
+npm test                       # run backend + frontend test suites
+
+npm test --workspace server    # backend only (Jest + supertest)
+npm test --workspace client    # frontend only (Vitest)
+```
+
+The backend test suite runs against an in-memory SQLite database, so **no running
+PostgreSQL is required to execute the tests**.
+
+---
+
+## API Overview
+
+| Method | Endpoint              | Description                         | Auth |
+| ------ | --------------------- | ----------------------------------- | ---- |
+| POST   | `/api/auth/register`  | Create an account, returns a JWT    | —    |
+| POST   | `/api/auth/login`     | Log in, returns a JWT               | —    |
+| GET    | `/api/companies`      | List companies                      | ✓    |
+| POST   | `/api/companies`      | Create a company                    | ✓    |
+| PUT    | `/api/companies/:id`  | Update a company                    | ✓    |
+| DELETE | `/api/companies/:id`  | Delete a company (cascades products)| ✓    |
+| GET    | `/api/products`       | List products (with company)        | ✓    |
+| POST   | `/api/products`       | Create a product                    | ✓    |
+| PUT    | `/api/products/:id`   | Update a product                    | ✓    |
+| DELETE | `/api/products/:id`   | Delete a product                    | ✓    |
+| GET    | `/api/stats`          | Dashboard aggregates                | ✓    |
+
+---
+
+## Architecture & Design Choices
+
+- **Monorepo with npm workspaces** keeps the frontend and backend in one repository
+  with a single install and unified scripts, while staying clearly separated.
+
+- **Layered backend** (`routes → controllers → services → models`). Business logic
+  lives in services, keeping controllers thin and the logic easy to unit-test. Input
+  is validated with **Zod** schemas and errors flow through a single error-handling
+  middleware that maps validation, not-found and conflict cases to proper HTTP codes.
+
+- **Sequelize models** define a relational schema where a `Product` belongs to a
+  `Company` (foreign key with `ON DELETE CASCADE`), so removing a company cleanly
+  removes its products.
+
+- **Environment-aware database**: PostgreSQL in development/production, and an
+  in-memory SQLite database for tests — giving fast, isolated, dependency-free tests.
+
+- **Server state with TanStack Query** on the frontend handles fetching, caching and
+  cache invalidation. Mutations invalidate the relevant queries, so the dashboard and
+  tables stay automatically in sync after every create/update/delete.
+
+- **JWT auth** is stored client-side and attached by an Axios interceptor; a response
+  interceptor logs the user out on `401`. Routes are guarded by a `ProtectedRoute`.
+
+- **Ant Design v5** provides the component library (as suggested), themed through a
+  `ConfigProvider` that supports a live dark/light toggle.
+
+---
 
 ## Project Structure
 
 ```
 ete-react-assignment/
-├── client/             # React + TypeScript + Vite + Ant Design
-├── server/             # Express + TypeScript + Sequelize + PostgreSQL
-├── docker-compose.yml  # PostgreSQL service
-└── package.json        # npm workspaces root
-```
-
-## Quick Start (preview)
-
-```bash
-docker-compose up -d   # start PostgreSQL
-npm install            # install all workspace dependencies
-npm run seed           # seed demo data (admin / admin123)
-npm run dev            # run backend + frontend
+├── client/                      # React + TypeScript + Vite + Ant Design
+│   └── src/
+│       ├── api/                 # Axios instance + resource clients
+│       ├── components/          # Layout, ProtectedRoute
+│       ├── context/             # Auth & theme providers
+│       ├── pages/               # Login, Dashboard, Companies, Products
+│       └── utils/               # CSV export helper
+├── server/                      # Express + TypeScript + Sequelize
+│   └── src/
+│       ├── config/              # Environment configuration
+│       ├── controllers/         # HTTP handlers
+│       ├── db/                  # Sequelize instance + seed script
+│       ├── middleware/          # Auth + error handling
+│       ├── models/              # User, Company, Product
+│       ├── routes/              # Route definitions
+│       ├── services/            # Business logic
+│       └── validators/          # Zod schemas
+├── docker-compose.yml           # PostgreSQL service
+└── package.json                 # npm workspaces root
 ```
