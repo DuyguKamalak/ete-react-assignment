@@ -30,6 +30,8 @@ export function Products() {
   const qc = useQueryClient();
   const { message } = AntApp.useApp();
   const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<string | undefined>();
+  const [companyFilter, setCompanyFilter] = useState<number | undefined>();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
   const [form] = Form.useForm<ProductInput>();
@@ -92,33 +94,39 @@ export function Products() {
     setModalOpen(true);
   };
 
-  const categoryFilters = useMemo(
-    () => Array.from(new Set(products.map((p) => p.category))).map((c) => ({ text: c, value: c })),
+  const categoryOptions = useMemo(
+    () =>
+      Array.from(new Set(products.map((p) => p.category)))
+        .sort((a, b) => a.localeCompare(b))
+        .map((c) => ({ label: c, value: c })),
     [products]
   );
-  const companyFilters = useMemo(
-    () => companies.map((c) => ({ text: c.name, value: c.id })),
+  const companyOptions = useMemo(
+    () => companies.map((c) => ({ label: c.name, value: c.id })),
     [companies]
   );
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return products;
-    return products.filter((p) =>
-      [p.name, p.category, p.amountUnit, p.company?.name ?? '']
-        .join(' ')
-        .toLowerCase()
-        .includes(q)
-    );
-  }, [products, search]);
+    return products.filter((p) => {
+      const matchesCategory = !categoryFilter || p.category === categoryFilter;
+      const matchesCompany = !companyFilter || p.companyId === companyFilter;
+      const matchesSearch =
+        !q ||
+        [p.name, p.category, p.amountUnit, p.company?.name ?? '']
+          .join(' ')
+          .toLowerCase()
+          .includes(q);
+      return matchesCategory && matchesCompany && matchesSearch;
+    });
+  }, [products, search, categoryFilter, companyFilter]);
 
   const columns: ColumnsType<Product> = [
     { title: 'Name', dataIndex: 'name', sorter: (a, b) => a.name.localeCompare(b.name) },
     {
       title: 'Category',
       dataIndex: 'category',
-      filters: categoryFilters,
-      onFilter: (value, record) => record.category === value,
+      sorter: (a, b) => a.category.localeCompare(b.category),
       render: (c: string) => <Tag color="blue">{c}</Tag>,
     },
     {
@@ -131,8 +139,7 @@ export function Products() {
     {
       title: 'Company',
       dataIndex: ['company', 'name'],
-      filters: companyFilters,
-      onFilter: (value, record) => record.companyId === value,
+      sorter: (a, b) => (a.company?.name ?? '').localeCompare(b.company?.name ?? ''),
       render: (_, record) => record.company?.name ?? '—',
     },
     {
@@ -158,14 +165,34 @@ export function Products() {
   return (
     <div>
       <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }} wrap>
-        <Input
-          allowClear
-          prefix={<SearchOutlined />}
-          placeholder="Search products..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{ width: 260 }}
-        />
+        <Space wrap>
+          <Input
+            allowClear
+            prefix={<SearchOutlined />}
+            placeholder="Search products..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ width: 240 }}
+          />
+          <Select
+            allowClear
+            placeholder="All categories"
+            value={categoryFilter}
+            onChange={setCategoryFilter}
+            options={categoryOptions}
+            style={{ width: 180 }}
+          />
+          <Select
+            allowClear
+            showSearch
+            optionFilterProp="label"
+            placeholder="All companies"
+            value={companyFilter}
+            onChange={setCompanyFilter}
+            options={companyOptions}
+            style={{ width: 200 }}
+          />
+        </Space>
         <Space>
           <Button
             icon={<DownloadOutlined />}

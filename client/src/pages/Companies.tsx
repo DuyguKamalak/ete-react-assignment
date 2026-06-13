@@ -4,6 +4,7 @@ import {
   Button,
   Space,
   Input,
+  Select,
   Modal,
   Form,
   Popconfirm,
@@ -29,6 +30,7 @@ export function Companies() {
   const qc = useQueryClient();
   const { message } = AntApp.useApp();
   const [search, setSearch] = useState('');
+  const [countryFilter, setCountryFilter] = useState<string | undefined>();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Company | null>(null);
   const [form] = Form.useForm<CompanyInput>();
@@ -77,25 +79,27 @@ export function Companies() {
     setModalOpen(true);
   };
 
-  const countryFilters = useMemo(
+  const countryOptions = useMemo(
     () =>
-      Array.from(new Set(companies.map((c) => c.incorporationCountry))).map((c) => ({
-        text: c,
-        value: c,
-      })),
+      Array.from(new Set(companies.map((c) => c.incorporationCountry)))
+        .sort((a, b) => a.localeCompare(b))
+        .map((c) => ({ label: c, value: c })),
     [companies]
   );
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return companies;
-    return companies.filter((c) =>
-      [c.name, c.legalNumber, c.incorporationCountry, c.website ?? '']
-        .join(' ')
-        .toLowerCase()
-        .includes(q)
-    );
-  }, [companies, search]);
+    return companies.filter((c) => {
+      const matchesCountry = !countryFilter || c.incorporationCountry === countryFilter;
+      const matchesSearch =
+        !q ||
+        [c.name, c.legalNumber, c.incorporationCountry, c.website ?? '']
+          .join(' ')
+          .toLowerCase()
+          .includes(q);
+      return matchesCountry && matchesSearch;
+    });
+  }, [companies, search, countryFilter]);
 
   const columns: ColumnsType<Company> = [
     {
@@ -111,8 +115,7 @@ export function Companies() {
     {
       title: 'Country',
       dataIndex: 'incorporationCountry',
-      filters: countryFilters,
-      onFilter: (value, record) => record.incorporationCountry === value,
+      sorter: (a, b) => a.incorporationCountry.localeCompare(b.incorporationCountry),
       render: (country: string) => <Tag>{country}</Tag>,
     },
     {
@@ -151,14 +154,24 @@ export function Companies() {
   return (
     <div>
       <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }} wrap>
-        <Input
-          allowClear
-          prefix={<SearchOutlined />}
-          placeholder="Search companies..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{ width: 260 }}
-        />
+        <Space wrap>
+          <Input
+            allowClear
+            prefix={<SearchOutlined />}
+            placeholder="Search companies..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ width: 260 }}
+          />
+          <Select
+            allowClear
+            placeholder="All countries"
+            value={countryFilter}
+            onChange={setCountryFilter}
+            options={countryOptions}
+            style={{ width: 200 }}
+          />
+        </Space>
         <Space>
           <Button
             icon={<DownloadOutlined />}
