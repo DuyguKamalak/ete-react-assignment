@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Layout, Menu, Button, Typography, Grid, theme as antdTheme } from 'antd';
+import { Layout, Menu, Button, Typography, Grid, Drawer, theme as antdTheme } from 'antd';
 import {
   DashboardOutlined,
   BankOutlined,
@@ -7,6 +7,7 @@ import {
   LogoutOutlined,
   BulbOutlined,
   BulbFilled,
+  MenuOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -21,6 +22,26 @@ const items = [
   { key: '/products', icon: <AppstoreOutlined />, label: 'Products' },
 ];
 
+function Brand({ short }: { short?: boolean }) {
+  const { mode } = useThemeMode();
+  return (
+    <div
+      style={{
+        height: 48,
+        margin: 16,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontWeight: 700,
+        fontSize: short ? 18 : 20,
+        color: mode === 'dark' ? '#fff' : undefined,
+      }}
+    >
+      {short ? 'ETE' : 'ETE Portal'}
+    </div>
+  );
+}
+
 export function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,42 +49,51 @@ export function AppLayout() {
   const { mode, toggle } = useThemeMode();
   const screens = useBreakpoint();
   const [collapsed, setCollapsed] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const {
     token: { colorBgContainer },
   } = antdTheme.useToken();
 
+  // `screens.lg` is undefined until the first measurement; treat that as desktop.
+  const isMobile = screens.lg === false;
+
+  const navMenu = (onNavigate?: () => void) => (
+    <Menu
+      theme={mode}
+      mode="inline"
+      selectedKeys={[location.pathname]}
+      items={items}
+      onClick={({ key }) => {
+        navigate(key);
+        onNavigate?.();
+      }}
+    />
+  );
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        breakpoint="lg"
-        collapsedWidth={screens.xs ? 0 : 80}
-        collapsible
-        collapsed={collapsed}
-        onCollapse={setCollapsed}
-        theme={mode}
-      >
-        <div
-          style={{
-            height: 48,
-            margin: 16,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 700,
-            fontSize: collapsed ? 18 : 20,
-            color: mode === 'dark' ? '#fff' : undefined,
-          }}
+      {/* Desktop: inline collapsible sidebar */}
+      {!isMobile && (
+        <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed} theme={mode}>
+          <Brand short={collapsed} />
+          {navMenu()}
+        </Sider>
+      )}
+
+      {/* Mobile: navigation lives in an overlay drawer so it never squeezes content */}
+      {isMobile && (
+        <Drawer
+          placement="left"
+          width={240}
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          styles={{ body: { padding: 0 }, header: { display: 'none' } }}
         >
-          {collapsed ? 'ETE' : 'ETE Portal'}
-        </div>
-        <Menu
-          theme={mode}
-          mode="inline"
-          selectedKeys={[location.pathname]}
-          items={items}
-          onClick={({ key }) => navigate(key)}
-        />
-      </Sider>
+          <Brand />
+          {navMenu(() => setDrawerOpen(false))}
+        </Drawer>
+      )}
+
       <Layout>
         <Header
           style={{
@@ -72,21 +102,36 @@ export function AppLayout() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            gap: 8,
           }}
         >
-          <Typography.Text strong>
-            {items.find((i) => i.key === location.pathname)?.label ?? 'ETE Portal'}
-          </Typography.Text>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+            {isMobile && (
+              <Button
+                type="text"
+                icon={<MenuOutlined />}
+                onClick={() => setDrawerOpen(true)}
+                aria-label="Open menu"
+              />
+            )}
+            <Typography.Text strong ellipsis>
+              {items.find((i) => i.key === location.pathname)?.label ?? 'ETE Portal'}
+            </Typography.Text>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
             <Button
               type="text"
               icon={mode === 'dark' ? <BulbFilled /> : <BulbOutlined />}
               onClick={toggle}
               aria-label="Toggle theme"
             />
-            <Typography.Text type="secondary">{user?.username}</Typography.Text>
-            <Button icon={<LogoutOutlined />} onClick={logout}>
-              Logout
+            {!isMobile && <Typography.Text type="secondary">{user?.username}</Typography.Text>}
+            <Button
+              icon={<LogoutOutlined />}
+              onClick={logout}
+              aria-label="Logout"
+            >
+              {!isMobile && 'Logout'}
             </Button>
           </div>
         </Header>
