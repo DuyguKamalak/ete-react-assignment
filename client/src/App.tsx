@@ -4,7 +4,9 @@ import { AppLayout } from './components/AppLayout';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { Companies } from './pages/Companies';
+import { CompanyDetail } from './pages/CompanyDetail';
 import { Products } from './pages/Products';
+import { ProductDetail } from './pages/ProductDetail';
 
 export default function App() {
   return (
@@ -14,7 +16,9 @@ export default function App() {
         <Route element={<AppLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/companies" element={<Companies />} />
+          <Route path="/companies/:id" element={<CompanyDetail />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/products/:id" element={<ProductDetail />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

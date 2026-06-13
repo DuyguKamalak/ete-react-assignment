@@ -8,6 +8,10 @@ export const companyController = {
     res.json(await companyService.list());
   }),
 
+  getOne: asyncHandler(async (req: Request, res: Response) => {
+    res.json(await companyService.getById(Number(req.params.id)));
+  }),
+
   create: asyncHandler(async (req: Request, res: Response) => {
     const input = companySchema.parse(req.body);
     res.status(201).json(await companyService.create(input));

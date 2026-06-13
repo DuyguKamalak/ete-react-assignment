@@ -8,6 +8,10 @@ export const productController = {
     res.json(await productService.list());
   }),
 
+  getOne: asyncHandler(async (req: Request, res: Response) => {
+    res.json(await productService.getById(Number(req.params.id)));
+  }),
+
   create: asyncHandler(async (req: Request, res: Response) => {
     const input = productSchema.parse(req.body);
     res.status(201).json(await productService.create(input));

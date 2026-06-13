@@ -22,6 +22,7 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { productsApi, companiesApi } from '../api/resources';
 import { getErrorMessage } from '../api/client';
 import { exportToCsv } from '../utils/csv';
@@ -124,7 +125,12 @@ export function Products() {
   }, [products, search, categoryFilter, companyFilter]);
 
   const columns: ColumnsType<Product> = [
-    { title: t('product.name'), dataIndex: 'name', sorter: (a, b) => a.name.localeCompare(b.name) },
+    {
+      title: t('product.name'),
+      dataIndex: 'name',
+      sorter: (a, b) => a.name.localeCompare(b.name),
+      render: (_, record) => <Link to={`/products/${record.id}`}>{record.name}</Link>,
+    },
     {
       title: t('product.category'),
       dataIndex: 'category',
@@ -142,7 +148,12 @@ export function Products() {
       title: t('product.company'),
       dataIndex: ['company', 'name'],
       sorter: (a, b) => (a.company?.name ?? '').localeCompare(b.company?.name ?? ''),
-      render: (_, record) => record.company?.name ?? '—',
+      render: (_, record) =>
+        record.company ? (
+          <Link to={`/companies/${record.company.id}`}>{record.company.name}</Link>
+        ) : (
+          '—'
+        ),
     },
     {
       title: t('common.actions'),

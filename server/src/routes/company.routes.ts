@@ -6,6 +6,7 @@ export const companyRouter = Router();
 
 companyRouter.use(authenticate);
 companyRouter.get('/', companyController.list);
+companyRouter.get('/:id', companyController.getOne);
 companyRouter.post('/', companyController.create);
 companyRouter.put('/:id', companyController.update);
 companyRouter.delete('/:id', companyController.remove);

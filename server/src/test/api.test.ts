@@ -72,6 +72,16 @@ describe('Companies & Products API', () => {
     expect(res.body.company.id).toBe(companyId);
   });
 
+  it('fetches a single company by id', async () => {
+    const res = await request(app).get(`/api/companies/${companyId}`).set(auth()).expect(200);
+    expect(res.body.id).toBe(companyId);
+    expect(res.body.name).toBe('Test Co');
+  });
+
+  it('returns 404 for a missing company', async () => {
+    await request(app).get('/api/companies/99999').set(auth()).expect(404);
+  });
+
   it('reflects created data in dashboard stats', async () => {
     const res = await request(app).get('/api/stats').set(auth()).expect(200);
     expect(res.body.totalCompanies).toBe(1);

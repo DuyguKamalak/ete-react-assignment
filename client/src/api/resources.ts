@@ -17,6 +17,7 @@ export const authApi = {
 
 export const companiesApi = {
   list: () => api.get<Company[]>('/companies').then((r) => r.data),
+  get: (id: number) => api.get<Company>(`/companies/${id}`).then((r) => r.data),
   create: (input: CompanyInput) => api.post<Company>('/companies', input).then((r) => r.data),
   update: (id: number, input: CompanyInput) =>
     api.put<Company>(`/companies/${id}`, input).then((r) => r.data),
@@ -25,6 +26,7 @@ export const companiesApi = {
 
 export const productsApi = {
   list: () => api.get<Product[]>('/products').then((r) => r.data),
+  get: (id: number) => api.get<Product>(`/products/${id}`).then((r) => r.data),
   create: (input: ProductInput) => api.post<Product>('/products', input).then((r) => r.data),
   update: (id: number, input: ProductInput) =>
     api.put<Product>(`/products/${id}`, input).then((r) => r.data),
