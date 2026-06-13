@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Layout, Menu, Button, Typography, Grid, Drawer, theme as antdTheme } from 'antd';
+import { Layout, Menu, Button, Typography, Grid, Drawer, Segmented, theme as antdTheme } from 'antd';
 import {
   DashboardOutlined,
   BankOutlined,
@@ -10,20 +10,23 @@ import {
   MenuOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useThemeMode } from '../context/ThemeContext';
+import { setLanguage } from '../i18n';
 
 const { Header, Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
 
-const items = [
-  { key: '/', icon: <DashboardOutlined />, label: 'Dashboard' },
-  { key: '/companies', icon: <BankOutlined />, label: 'Companies' },
-  { key: '/products', icon: <AppstoreOutlined />, label: 'Products' },
+const navKeys = [
+  { key: '/', icon: <DashboardOutlined />, label: 'nav.dashboard' },
+  { key: '/companies', icon: <BankOutlined />, label: 'nav.companies' },
+  { key: '/products', icon: <AppstoreOutlined />, label: 'nav.products' },
 ];
 
 function Brand({ short }: { short?: boolean }) {
   const { mode } = useThemeMode();
+  const { t } = useTranslation();
   return (
     <div
       style={{
@@ -37,7 +40,7 @@ function Brand({ short }: { short?: boolean }) {
         color: mode === 'dark' ? '#fff' : undefined,
       }}
     >
-      {short ? 'ETE' : 'ETE Portal'}
+      {short ? 'ETE' : t('common.appName')}
     </div>
   );
 }
@@ -45,6 +48,7 @@ function Brand({ short }: { short?: boolean }) {
 export function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
   const { mode, toggle } = useThemeMode();
   const screens = useBreakpoint();
@@ -54,8 +58,9 @@ export function AppLayout() {
     token: { colorBgContainer },
   } = antdTheme.useToken();
 
-  // `screens.lg` is undefined until the first measurement; treat that as desktop.
   const isMobile = screens.lg === false;
+  const items = navKeys.map((i) => ({ key: i.key, icon: i.icon, label: t(i.label) }));
+  const currentTitle = navKeys.find((i) => i.key === location.pathname);
 
   const navMenu = (onNavigate?: () => void) => (
     <Menu
@@ -72,7 +77,6 @@ export function AppLayout() {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      {/* Desktop: inline collapsible sidebar */}
       {!isMobile && (
         <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed} theme={mode}>
           <Brand short={collapsed} />
@@ -80,7 +84,6 @@ export function AppLayout() {
         </Sider>
       )}
 
-      {/* Mobile: navigation lives in an overlay drawer so it never squeezes content */}
       {isMobile && (
         <Drawer
           placement="left"
@@ -115,10 +118,19 @@ export function AppLayout() {
               />
             )}
             <Typography.Text strong ellipsis>
-              {items.find((i) => i.key === location.pathname)?.label ?? 'ETE Portal'}
+              {currentTitle ? t(currentTitle.label) : t('common.appName')}
             </Typography.Text>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            <Segmented
+              size="small"
+              value={i18n.language === 'tr' ? 'tr' : 'en'}
+              onChange={(val) => setLanguage(val as 'en' | 'tr')}
+              options={[
+                { label: 'EN', value: 'en' },
+                { label: 'TR', value: 'tr' },
+              ]}
+            />
             <Button
               type="text"
               icon={mode === 'dark' ? <BulbFilled /> : <BulbOutlined />}
@@ -126,12 +138,8 @@ export function AppLayout() {
               aria-label="Toggle theme"
             />
             {!isMobile && <Typography.Text type="secondary">{user?.username}</Typography.Text>}
-            <Button
-              icon={<LogoutOutlined />}
-              onClick={logout}
-              aria-label="Logout"
-            >
-              {!isMobile && 'Logout'}
+            <Button icon={<LogoutOutlined />} onClick={logout} aria-label={t('common.logout')}>
+              {!isMobile && t('common.logout')}
             </Button>
           </div>
         </Header>

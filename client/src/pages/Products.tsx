@@ -21,6 +21,7 @@ import {
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { productsApi, companiesApi } from '../api/resources';
 import { getErrorMessage } from '../api/client';
 import { exportToCsv } from '../utils/csv';
@@ -28,6 +29,7 @@ import type { Product, ProductInput } from '../types';
 
 export function Products() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   const { message } = AntApp.useApp();
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string | undefined>();
@@ -54,7 +56,7 @@ export function Products() {
     mutationFn: (values: ProductInput) =>
       editing ? productsApi.update(editing.id, values) : productsApi.create(values),
     onSuccess: () => {
-      message.success(editing ? 'Product updated' : 'Product created');
+      message.success(editing ? t('product.updated') : t('product.created'));
       setModalOpen(false);
       setEditing(null);
       form.resetFields();
@@ -66,7 +68,7 @@ export function Products() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => productsApi.remove(id),
     onSuccess: () => {
-      message.success('Product deleted');
+      message.success(t('product.deleted'));
       invalidate();
     },
     onError: (e) => message.error(getErrorMessage(e)),
@@ -74,7 +76,7 @@ export function Products() {
 
   const openCreate = () => {
     if (!companies.length) {
-      message.warning('Please add a company first');
+      message.warning(t('product.addCompanyFirst'));
       return;
     }
     setEditing(null);
@@ -122,36 +124,36 @@ export function Products() {
   }, [products, search, categoryFilter, companyFilter]);
 
   const columns: ColumnsType<Product> = [
-    { title: 'Name', dataIndex: 'name', sorter: (a, b) => a.name.localeCompare(b.name) },
+    { title: t('product.name'), dataIndex: 'name', sorter: (a, b) => a.name.localeCompare(b.name) },
     {
-      title: 'Category',
+      title: t('product.category'),
       dataIndex: 'category',
       sorter: (a, b) => a.category.localeCompare(b.category),
       render: (c: string) => <Tag color="blue">{c}</Tag>,
     },
     {
-      title: 'Amount',
+      title: t('product.amount'),
       dataIndex: 'amount',
       align: 'right',
       sorter: (a, b) => a.amount - b.amount,
       render: (amount: number, record) => `${amount.toLocaleString()} ${record.amountUnit}`,
     },
     {
-      title: 'Company',
+      title: t('product.company'),
       dataIndex: ['company', 'name'],
       sorter: (a, b) => (a.company?.name ?? '').localeCompare(b.company?.name ?? ''),
       render: (_, record) => record.company?.name ?? '—',
     },
     {
-      title: 'Actions',
+      title: t('common.actions'),
       key: 'actions',
       width: 140,
       render: (_, record) => (
         <Space>
           <Button size="small" icon={<EditOutlined />} onClick={() => openEdit(record)} />
           <Popconfirm
-            title="Delete this product?"
-            okText="Delete"
+            title={t('product.deleteConfirm')}
+            okText={t('common.delete')}
             okButtonProps={{ danger: true }}
             onConfirm={() => deleteMutation.mutate(record.id)}
           >
@@ -169,14 +171,14 @@ export function Products() {
           <Input
             allowClear
             prefix={<SearchOutlined />}
-            placeholder="Search products..."
+            placeholder={t('product.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ width: 240 }}
           />
           <Select
             allowClear
-            placeholder="All categories"
+            placeholder={t('product.allCategories')}
             value={categoryFilter}
             onChange={setCategoryFilter}
             options={categoryOptions}
@@ -186,7 +188,7 @@ export function Products() {
             allowClear
             showSearch
             optionFilterProp="label"
-            placeholder="All companies"
+            placeholder={t('product.allCompanies')}
             value={companyFilter}
             onChange={setCompanyFilter}
             options={companyOptions}
@@ -211,10 +213,10 @@ export function Products() {
               )
             }
           >
-            Export CSV
+            {t('common.exportCsv')}
           </Button>
           <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
-            Add Product
+            {t('product.addBtn')}
           </Button>
         </Space>
       </Space>
@@ -224,17 +226,22 @@ export function Products() {
         loading={isLoading}
         columns={columns}
         dataSource={filtered}
-        pagination={{ pageSize: 8, showSizeChanger: true, showTotal: (t) => `${t} products` }}
+        pagination={{
+          pageSize: 8,
+          showSizeChanger: true,
+          showTotal: (total) => t('product.total', { count: total }),
+        }}
         scroll={{ x: 'max-content' }}
       />
 
       <Modal
-        title={editing ? 'Edit Product' : 'Add Product'}
+        title={editing ? t('product.editModal') : t('product.addModal')}
         open={modalOpen}
         onCancel={() => setModalOpen(false)}
         onOk={() => form.submit()}
         confirmLoading={saveMutation.isPending}
-        okText={editing ? 'Save' : 'Create'}
+        okText={editing ? t('common.save') : t('common.create')}
+        cancelText={t('common.cancel')}
         destroyOnClose
       >
         <Form
@@ -245,41 +252,41 @@ export function Products() {
         >
           <Form.Item
             name="name"
-            label="Product Name"
-            rules={[{ required: true, message: 'Product name is required' }]}
+            label={t('product.name')}
+            rules={[{ required: true, message: t('product.nameRule') }]}
           >
             <Input placeholder="Widget" />
           </Form.Item>
           <Form.Item
             name="category"
-            label="Category"
-            rules={[{ required: true, message: 'Category is required' }]}
+            label={t('product.category')}
+            rules={[{ required: true, message: t('product.categoryRule') }]}
           >
             <Input placeholder="Electronics" />
           </Form.Item>
           <Space style={{ display: 'flex' }} align="start">
             <Form.Item
               name="amount"
-              label="Amount"
-              rules={[{ required: true, message: 'Amount is required' }]}
+              label={t('product.amount')}
+              rules={[{ required: true, message: t('product.amountRule') }]}
             >
               <InputNumber min={0} style={{ width: '100%' }} placeholder="100" />
             </Form.Item>
             <Form.Item
               name="amountUnit"
-              label="Unit"
-              rules={[{ required: true, message: 'Unit is required' }]}
+              label={t('product.unit')}
+              rules={[{ required: true, message: t('product.unitRule') }]}
             >
               <Input placeholder="pcs / kg / m" />
             </Form.Item>
           </Space>
           <Form.Item
             name="companyId"
-            label="Company"
-            rules={[{ required: true, message: 'Company is required' }]}
+            label={t('product.company')}
+            rules={[{ required: true, message: t('product.companyRule') }]}
           >
             <Select
-              placeholder="Select a company"
+              placeholder={t('product.selectCompany')}
               showSearch
               optionFilterProp="label"
               options={companies.map((c) => ({ label: c.name, value: c.id }))}

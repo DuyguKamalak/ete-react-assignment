@@ -21,6 +21,7 @@ import {
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { companiesApi } from '../api/resources';
 import { getErrorMessage } from '../api/client';
 import { exportToCsv } from '../utils/csv';
@@ -28,6 +29,7 @@ import type { Company, CompanyInput } from '../types';
 
 export function Companies() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   const { message } = AntApp.useApp();
   const [search, setSearch] = useState('');
   const [countryFilter, setCountryFilter] = useState<string | undefined>();
@@ -49,7 +51,7 @@ export function Companies() {
     mutationFn: (values: CompanyInput) =>
       editing ? companiesApi.update(editing.id, values) : companiesApi.create(values),
     onSuccess: () => {
-      message.success(editing ? 'Company updated' : 'Company created');
+      message.success(editing ? t('company.updated') : t('company.created'));
       setModalOpen(false);
       setEditing(null);
       form.resetFields();
@@ -61,7 +63,7 @@ export function Companies() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => companiesApi.remove(id),
     onSuccess: () => {
-      message.success('Company deleted');
+      message.success(t('company.deleted'));
       invalidate();
     },
     onError: (e) => message.error(getErrorMessage(e)),
@@ -103,23 +105,23 @@ export function Companies() {
 
   const columns: ColumnsType<Company> = [
     {
-      title: 'Name',
+      title: t('company.name'),
       dataIndex: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
-      title: 'Legal Number',
+      title: t('company.legalNumber'),
       dataIndex: 'legalNumber',
       sorter: (a, b) => a.legalNumber.localeCompare(b.legalNumber),
     },
     {
-      title: 'Country',
+      title: t('company.country'),
       dataIndex: 'incorporationCountry',
       sorter: (a, b) => a.incorporationCountry.localeCompare(b.incorporationCountry),
       render: (country: string) => <Tag>{country}</Tag>,
     },
     {
-      title: 'Website',
+      title: t('company.website'),
       dataIndex: 'website',
       render: (website: string | null) =>
         website ? (
@@ -131,16 +133,16 @@ export function Companies() {
         ),
     },
     {
-      title: 'Actions',
+      title: t('common.actions'),
       key: 'actions',
       width: 140,
       render: (_, record) => (
         <Space>
           <Button size="small" icon={<EditOutlined />} onClick={() => openEdit(record)} />
           <Popconfirm
-            title="Delete this company?"
-            description="Its products will also be removed."
-            okText="Delete"
+            title={t('company.deleteConfirm')}
+            description={t('company.deleteDesc')}
+            okText={t('common.delete')}
             okButtonProps={{ danger: true }}
             onConfirm={() => deleteMutation.mutate(record.id)}
           >
@@ -158,14 +160,14 @@ export function Companies() {
           <Input
             allowClear
             prefix={<SearchOutlined />}
-            placeholder="Search companies..."
+            placeholder={t('company.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ width: 260 }}
           />
           <Select
             allowClear
-            placeholder="All countries"
+            placeholder={t('company.allCountries')}
             value={countryFilter}
             onChange={setCountryFilter}
             options={countryOptions}
@@ -185,10 +187,10 @@ export function Companies() {
               ])
             }
           >
-            Export CSV
+            {t('common.exportCsv')}
           </Button>
           <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
-            Add Company
+            {t('company.addBtn')}
           </Button>
         </Space>
       </Space>
@@ -198,17 +200,22 @@ export function Companies() {
         loading={isLoading}
         columns={columns}
         dataSource={filtered}
-        pagination={{ pageSize: 8, showSizeChanger: true, showTotal: (t) => `${t} companies` }}
+        pagination={{
+          pageSize: 8,
+          showSizeChanger: true,
+          showTotal: (total) => t('company.total', { count: total }),
+        }}
         scroll={{ x: 'max-content' }}
       />
 
       <Modal
-        title={editing ? 'Edit Company' : 'Add Company'}
+        title={editing ? t('company.editModal') : t('company.addModal')}
         open={modalOpen}
         onCancel={() => setModalOpen(false)}
         onOk={() => form.submit()}
         confirmLoading={saveMutation.isPending}
-        okText={editing ? 'Save' : 'Create'}
+        okText={editing ? t('common.save') : t('common.create')}
+        cancelText={t('common.cancel')}
         destroyOnClose
       >
         <Form
@@ -219,29 +226,29 @@ export function Companies() {
         >
           <Form.Item
             name="name"
-            label="Company Name"
-            rules={[{ required: true, message: 'Company name is required' }]}
+            label={t('company.name')}
+            rules={[{ required: true, message: t('company.nameRule') }]}
           >
             <Input placeholder="Acme Inc." />
           </Form.Item>
           <Form.Item
             name="legalNumber"
-            label="Legal Number"
-            rules={[{ required: true, message: 'Legal number is required' }]}
+            label={t('company.legalNumber')}
+            rules={[{ required: true, message: t('company.legalRule') }]}
           >
             <Input placeholder="TR-1234" />
           </Form.Item>
           <Form.Item
             name="incorporationCountry"
-            label="Incorporation Country"
-            rules={[{ required: true, message: 'Country is required' }]}
+            label={t('company.country')}
+            rules={[{ required: true, message: t('company.countryRule') }]}
           >
             <Input placeholder="Türkiye" />
           </Form.Item>
           <Form.Item
             name="website"
-            label="Website"
-            rules={[{ type: 'url', message: 'Must be a valid URL' }]}
+            label={t('company.website')}
+            rules={[{ type: 'url', message: t('company.urlRule') }]}
           >
             <Input placeholder="https://example.com" />
           </Form.Item>

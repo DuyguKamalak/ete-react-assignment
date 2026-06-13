@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom';
+import '../i18n';
 
 // Ant Design relies on matchMedia, which jsdom does not implement.
 window.matchMedia =

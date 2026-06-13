@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, Form, Input, Button, Tabs, Typography, App as AntApp } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation, Trans } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { getErrorMessage } from '../api/client';
 
@@ -14,6 +15,7 @@ interface Credentials {
 export function Login() {
   const { login, register } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { message } = AntApp.useApp();
   const [mode, setMode] = useState<Mode>('login');
   const [loading, setLoading] = useState(false);
@@ -23,14 +25,14 @@ export function Login() {
     try {
       if (mode === 'login') {
         await login(values.username, values.password);
-        message.success('Welcome back!');
+        message.success(t('login.welcome'));
       } else {
         await register(values.username, values.password);
-        message.success('Account created successfully!');
+        message.success(t('login.created'));
       }
       navigate('/');
     } catch (error) {
-      message.error(getErrorMessage(error, 'Authentication failed'));
+      message.error(getErrorMessage(error, t('login.failed')));
     } finally {
       setLoading(false);
     }
@@ -40,23 +42,23 @@ export function Login() {
     <Form layout="vertical" onFinish={onFinish} requiredMark={false} size="large">
       <Form.Item
         name="username"
-        rules={[{ required: true, min: 3, message: 'Username must be at least 3 characters' }]}
+        rules={[{ required: true, min: 3, message: t('login.usernameRule') }]}
       >
-        <Input prefix={<UserOutlined />} placeholder="Username" autoComplete="username" />
+        <Input prefix={<UserOutlined />} placeholder={t('login.username')} autoComplete="username" />
       </Form.Item>
       <Form.Item
         name="password"
-        rules={[{ required: true, min: 6, message: 'Password must be at least 6 characters' }]}
+        rules={[{ required: true, min: 6, message: t('login.passwordRule') }]}
       >
         <Input.Password
           prefix={<LockOutlined />}
-          placeholder="Password"
+          placeholder={t('login.password')}
           autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
         />
       </Form.Item>
       <Form.Item style={{ marginBottom: 0 }}>
         <Button type="primary" htmlType="submit" block loading={loading}>
-          {mode === 'login' ? 'Log in' : 'Create account'}
+          {mode === 'login' ? t('login.loginBtn') : t('login.registerBtn')}
         </Button>
       </Form.Item>
     </Form>
@@ -75,23 +77,23 @@ export function Login() {
     >
       <Card style={{ width: 400, maxWidth: '100%' }}>
         <Typography.Title level={3} style={{ textAlign: 'center', marginBottom: 4 }}>
-          ETE Portal
+          {t('common.appName')}
         </Typography.Title>
         <Typography.Paragraph type="secondary" style={{ textAlign: 'center' }}>
-          Company &amp; Product Management
+          {t('login.subtitle')}
         </Typography.Paragraph>
         <Tabs
           activeKey={mode}
           onChange={(k) => setMode(k as Mode)}
           centered
           items={[
-            { key: 'login', label: 'Login', children: form },
-            { key: 'register', label: 'Register', children: form },
+            { key: 'login', label: t('login.login'), children: form },
+            { key: 'register', label: t('login.register'), children: form },
           ]}
         />
         {mode === 'login' && (
           <Typography.Paragraph type="secondary" style={{ textAlign: 'center', fontSize: 12 }}>
-            Demo account — <b>admin</b> / <b>admin123</b>
+            <Trans i18nKey="login.demoHint" />
           </Typography.Paragraph>
         )}
       </Card>

@@ -1,6 +1,7 @@
 import { Row, Col, Card, Statistic, List, Tag, Empty, Spin, Alert, Typography } from 'antd';
 import { BankOutlined, AppstoreOutlined, TagsOutlined, GlobalOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import {
   BarChart,
   Bar,
@@ -19,6 +20,7 @@ import { getErrorMessage } from '../api/client';
 const PIE_COLORS = ['#1677ff', '#52c41a', '#faad14', '#eb2f96', '#13c2c2', '#722ed1'];
 
 export function Dashboard() {
+  const { t } = useTranslation();
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['stats'],
     queryFn: statsApi.dashboard,
@@ -33,7 +35,7 @@ export function Dashboard() {
   }
 
   if (isError || !data) {
-    return <Alert type="error" message={getErrorMessage(error, 'Failed to load dashboard')} />;
+    return <Alert type="error" message={getErrorMessage(error, t('dashboard.loadError'))} />;
   }
 
   return (
@@ -42,42 +44,42 @@ export function Dashboard() {
         <Col xs={12} md={6}>
           <Card>
             <Statistic
-              title="Companies"
+              title={t('dashboard.companies')}
               value={data.totalCompanies}
               prefix={<BankOutlined />}
             />
             <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-              There are {data.totalCompanies} companies in the system
+              {t('dashboard.companiesHint', { count: data.totalCompanies })}
             </Typography.Text>
           </Card>
         </Col>
         <Col xs={12} md={6}>
           <Card>
             <Statistic
-              title="Products"
+              title={t('dashboard.products')}
               value={data.totalProducts}
               prefix={<AppstoreOutlined />}
             />
             <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-              Across {data.distinctCategories} categories
+              {t('dashboard.productsHint', { count: data.distinctCategories })}
             </Typography.Text>
           </Card>
         </Col>
         <Col xs={12} md={6}>
           <Card>
-            <Statistic title="Categories" value={data.distinctCategories} prefix={<TagsOutlined />} />
+            <Statistic title={t('dashboard.categories')} value={data.distinctCategories} prefix={<TagsOutlined />} />
           </Card>
         </Col>
         <Col xs={12} md={6}>
           <Card>
-            <Statistic title="Countries" value={data.distinctCountries} prefix={<GlobalOutlined />} />
+            <Statistic title={t('dashboard.countries')} value={data.distinctCountries} prefix={<GlobalOutlined />} />
           </Card>
         </Col>
       </Row>
 
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24} lg={12}>
-          <Card title="Products by category">
+          <Card title={t('dashboard.byCategory')}>
             {data.productsByCategory.length === 0 ? (
               <Empty />
             ) : (
@@ -93,7 +95,7 @@ export function Dashboard() {
           </Card>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="Companies by country">
+          <Card title={t('dashboard.byCountry')}>
             {data.companiesByCountry.length === 0 ? (
               <Empty />
             ) : (
@@ -123,7 +125,7 @@ export function Dashboard() {
 
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24}>
-          <Card title="Lastly added companies">
+          <Card title={t('dashboard.lastlyAdded')}>
             <List
               dataSource={data.latestCompanies}
               locale={{ emptyText: <Empty /> }}
@@ -133,7 +135,7 @@ export function Dashboard() {
                 >
                   <List.Item.Meta
                     title={c.name}
-                    description={`Legal No: ${c.legalNumber}`}
+                    description={`${t('dashboard.legalNo')}: ${c.legalNumber}`}
                   />
                   <Typography.Text type="secondary">
                     {new Date(c.createdAt).toLocaleDateString()}
