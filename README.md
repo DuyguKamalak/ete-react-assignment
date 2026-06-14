@@ -105,6 +105,22 @@ npm run dev
 
 ---
 
+## Deployment (live demo)
+
+The app is deployment-ready for a **Vercel (frontend) + Render (backend & PostgreSQL)** setup:
+
+- **Backend & database — Render:** the [`render.yaml`](./render.yaml) blueprint provisions
+  a Dockerized API service and a managed PostgreSQL instance. On first boot the container
+  runs the migrations and seeders automatically. Set `CLIENT_ORIGIN` to the Vercel URL.
+- **Frontend — Vercel:** import the repo with **Root Directory = `client`**. Vite is
+  detected automatically ([`client/vercel.json`](./client/vercel.json) adds SPA routing).
+  Set the env var `VITE_API_URL` to the Render API URL plus `/api`.
+- **No cold starts:** the [`keep-alive`](./.github/workflows/keep-alive.yml) workflow pings
+  the backend every 10 minutes. Add a repository variable `BACKEND_URL` with the Render URL.
+  (For extra reliability you can also use a free uptime monitor.)
+
+---
+
 ## Running Tests
 
 ```bash

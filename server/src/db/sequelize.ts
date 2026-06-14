@@ -16,4 +16,8 @@ export const sequelize =
         port: env.db.port,
         dialect: 'postgres',
         logging: false,
+        // Enable SSL for managed/remote PostgreSQL providers when DB_SSL=true.
+        ...(process.env.DB_SSL === 'true'
+          ? { dialectOptions: { ssl: { require: true, rejectUnauthorized: false } } }
+          : {}),
       });

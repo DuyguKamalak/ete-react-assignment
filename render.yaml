@@ -1,0 +1,47 @@
+# Render Blueprint — provisions the backend (Docker) and a managed PostgreSQL.
+# In the Render dashboard: New → Blueprint → connect this repo. Render reads this file.
+services:
+  - type: web
+    name: ete-server
+    runtime: docker
+    dockerfilePath: ./server/Dockerfile
+    dockerContext: ./server
+    plan: free
+    healthCheckPath: /api/health
+    # Render injects PORT automatically; the app reads process.env.PORT.
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_SYNC
+        value: "false"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 1d
+      # Set this to your Vercel URL after the frontend is deployed (for CORS).
+      - key: CLIENT_ORIGIN
+        sync: false
+      - key: DB_HOST
+        fromDatabase:
+          name: ete-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: ete-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: ete-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: ete-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: ete-db
+          property: password
+
+databases:
+  - name: ete-db
+    plan: free
