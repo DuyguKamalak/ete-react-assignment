@@ -40,9 +40,9 @@ export function Dashboard() {
 
   return (
     <div>
-      <Row gutter={[16, 16]}>
+      <Row gutter={[16, 16]} align="stretch">
         <Col xs={12} md={6}>
-          <Card>
+          <Card style={{ height: '100%' }}>
             <Statistic
               title={t('dashboard.companies')}
               value={data.totalCompanies}
@@ -54,7 +54,7 @@ export function Dashboard() {
           </Card>
         </Col>
         <Col xs={12} md={6}>
-          <Card>
+          <Card style={{ height: '100%' }}>
             <Statistic
               title={t('dashboard.products')}
               value={data.totalProducts}
@@ -66,20 +66,26 @@ export function Dashboard() {
           </Card>
         </Col>
         <Col xs={12} md={6}>
-          <Card>
+          <Card style={{ height: '100%' }}>
             <Statistic title={t('dashboard.categories')} value={data.distinctCategories} prefix={<TagsOutlined />} />
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              {t('dashboard.categoriesHint')}
+            </Typography.Text>
           </Card>
         </Col>
         <Col xs={12} md={6}>
-          <Card>
+          <Card style={{ height: '100%' }}>
             <Statistic title={t('dashboard.countries')} value={data.distinctCountries} prefix={<GlobalOutlined />} />
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              {t('dashboard.countriesHint')}
+            </Typography.Text>
           </Card>
         </Col>
       </Row>
 
-      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+      <Row gutter={[16, 16]} align="stretch" style={{ marginTop: 16 }}>
         <Col xs={24} lg={12}>
-          <Card title={t('dashboard.byCategory')}>
+          <Card title={t('dashboard.byCategory')} style={{ height: '100%' }}>
             {data.productsByCategory.length === 0 ? (
               <Empty />
             ) : (
@@ -95,7 +101,7 @@ export function Dashboard() {
           </Card>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title={t('dashboard.byCountry')}>
+          <Card title={t('dashboard.byCountry')} style={{ height: '100%' }}>
             {data.companiesByCountry.length === 0 ? (
               <Empty />
             ) : (
