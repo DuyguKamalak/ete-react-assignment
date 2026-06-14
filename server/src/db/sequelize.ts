@@ -8,16 +8,32 @@ import { env } from '../config/env';
  * the suite can run anywhere without a running PostgreSQL server. In every other
  * environment we connect to PostgreSQL using the credentials from `.env`.
  */
-export const sequelize =
-  env.nodeEnv === 'test'
-    ? new Sequelize({ dialect: 'sqlite', storage: ':memory:', logging: false })
-    : new Sequelize(env.db.name, env.db.user, env.db.password, {
-        host: env.db.host,
-        port: env.db.port,
-        dialect: 'postgres',
-        logging: false,
-        // Enable SSL for managed/remote PostgreSQL providers when DB_SSL=true.
-        ...(process.env.DB_SSL === 'true'
-          ? { dialectOptions: { ssl: { require: true, rejectUnauthorized: false } } }
-          : {}),
-      });
+const sslOption =
+  process.env.DB_SSL === 'true'
+    ? { dialectOptions: { ssl: { require: true, rejectUnauthorized: false } } }
+    : {};
+
+function buildSequelize(): Sequelize {
+  if (env.nodeEnv === 'test') {
+    return new Sequelize({ dialect: 'sqlite', storage: ':memory:', logging: false });
+  }
+
+  // Managed providers (e.g. Render) expose a single connection string.
+  if (process.env.DATABASE_URL) {
+    return new Sequelize(process.env.DATABASE_URL, {
+      dialect: 'postgres',
+      logging: false,
+      ...sslOption,
+    });
+  }
+
+  return new Sequelize(env.db.name, env.db.user, env.db.password, {
+    host: env.db.host,
+    port: env.db.port,
+    dialect: 'postgres',
+    logging: false,
+    ...sslOption,
+  });
+}
+
+export const sequelize = buildSequelize();
