@@ -10,6 +10,7 @@ import App from './App';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeModeProvider, useThemeMode } from './context/ThemeContext';
 import './i18n';
+import './index.css';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 1 } },

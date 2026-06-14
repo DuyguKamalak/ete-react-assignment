@@ -1,0 +1,14 @@
+/* App chrome (header, sidebar, menu, buttons, tabs, switches) should feel like a
+   native app: no text selection and a default cursor instead of the text caret.
+   Data content (tables, detail descriptions, forms) stays selectable so it can be
+   copied. */
+.ant-layout-header,
+.ant-layout-sider,
+.ant-menu,
+.ant-btn,
+.ant-segmented,
+.ant-tabs-nav,
+.ant-drawer-body .ant-menu {
+  -webkit-user-select: none;
+  user-select: none;
+}
