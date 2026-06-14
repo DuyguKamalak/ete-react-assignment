@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Table,
   Button,
@@ -72,15 +72,20 @@ export function Companies() {
 
   const openCreate = () => {
     setEditing(null);
-    form.resetFields();
     setModalOpen(true);
   };
 
   const openEdit = (company: Company) => {
     setEditing(company);
-    form.setFieldsValue(company);
     setModalOpen(true);
   };
+
+  // Populate (or reset) the form once the modal has opened and the Form is mounted.
+  useEffect(() => {
+    if (!modalOpen) return;
+    if (editing) form.setFieldsValue(editing);
+    else form.resetFields();
+  }, [modalOpen, editing, form]);
 
   const countryOptions = useMemo(
     () =>

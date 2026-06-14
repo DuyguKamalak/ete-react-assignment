@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Table,
   Button,
@@ -81,21 +81,29 @@ export function Products() {
       return;
     }
     setEditing(null);
-    form.resetFields();
     setModalOpen(true);
   };
 
   const openEdit = (product: Product) => {
     setEditing(product);
-    form.setFieldsValue({
-      name: product.name,
-      category: product.category,
-      amount: product.amount,
-      amountUnit: product.amountUnit,
-      companyId: product.companyId,
-    });
     setModalOpen(true);
   };
+
+  // Populate (or reset) the form once the modal has opened and the Form is mounted.
+  useEffect(() => {
+    if (!modalOpen) return;
+    if (editing) {
+      form.setFieldsValue({
+        name: editing.name,
+        category: editing.category,
+        amount: editing.amount,
+        amountUnit: editing.amountUnit,
+        companyId: editing.companyId,
+      });
+    } else {
+      form.resetFields();
+    }
+  }, [modalOpen, editing, form]);
 
   const categoryOptions = useMemo(
     () =>
