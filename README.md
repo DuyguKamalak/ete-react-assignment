@@ -18,14 +18,19 @@ Built as a technical assignment.
 
 ## Screenshots
 
-<!-- Capture the images, save them under docs/screenshots/, then uncomment:
-![Dashboard](docs/screenshots/dashboard.png)
-![Companies table](docs/screenshots/companies.png)
-![Dark mode](docs/screenshots/dark-mode.png)
--->
+**Dashboard** — live statistics and charts
 
-See the app in action on the [live demo](https://ete-portal-five.vercel.app)
-(`admin` / `admin123`).
+![Dashboard](docs/screenshots/dashboard.png)
+
+**Companies** — sortable, searchable table with CSV export
+
+![Companies table](docs/screenshots/companies.png)
+
+**Dark mode**
+
+![Dark mode](docs/screenshots/dark-mode.png)
+
+See it live on the [demo](https://ete-portal-five.vercel.app) (`admin` / `admin123`).
 
 ---
 
