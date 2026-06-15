@@ -62,6 +62,7 @@ See it live on the [demo](https://ete-portal-five.vercel.app) (`admin` / `admin1
 - [x] Unit & integration tests (backend and frontend)
 - [x] JWT authentication with hashed passwords
 - [x] TypeScript across the entire stack
+- [x] Bilingual UI — English / Turkish (i18next), with a persisted language choice
 - [x] Dark/light theme, CSV export, dashboard charts, responsive layout, toast
   notifications, confirmation dialogs
 
@@ -224,6 +225,10 @@ PostgreSQL is required to execute the tests**.
 
 - **Ant Design v5** provides the component library (as suggested), themed through a
   `ConfigProvider` that supports a live dark/light toggle.
+
+- **Internationalization** with `react-i18next` — the entire UI ships in English and
+  Turkish, the selected language persists in `localStorage`, and Ant Design's own locale
+  switches with it (`enUS` / `trTR`) so component text and formatting follow the language.
 
 ---
 
