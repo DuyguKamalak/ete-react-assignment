@@ -4,6 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ETE — Company & Product Management</title>
+    <script>
+      // Paint the correct theme background before React/AntD mount, so a dark-mode
+      // reload doesn't flash white (FOUC). Mirrors ThemeContext's 'ete_theme' key.
+      (function () {
+        try {
+          var dark = localStorage.getItem('ete_theme') === 'dark';
+          var bg = dark ? '#000' : '#fff';
+          var root = document.documentElement;
+          root.style.background = bg;
+          root.style.colorScheme = dark ? 'dark' : 'light';
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
