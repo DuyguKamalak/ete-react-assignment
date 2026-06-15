@@ -12,7 +12,20 @@ A full-stack application for managing companies and their products. It features 
 authentication, a live statistics dashboard, and full CRUD with sorting, filtering,
 searching, pagination and CSV export.
 
-Built as a technical assignment, covering every required feature plus all listed bonuses.
+Built as a technical assignment.
+
+---
+
+## Screenshots
+
+<!-- Capture the images, save them under docs/screenshots/, then uncomment:
+![Dashboard](docs/screenshots/dashboard.png)
+![Companies table](docs/screenshots/companies.png)
+![Dark mode](docs/screenshots/dark-mode.png)
+-->
+
+See the app in action on the [live demo](https://ete-portal-five.vercel.app)
+(`admin` / `admin123`).
 
 ---
 
@@ -28,25 +41,24 @@ Built as a technical assignment, covering every required feature plus all listed
 
 ---
 
-## Features
+## Requirements Coverage
 
-**Core**
+**Required**
 
-- Login / Register with JWT authentication
-- Dashboard with dynamic statistics (totals, latest companies) and charts
-- Companies table — full CRUD (Name, Legal Number, Incorporation Country, Website)
-- Products table — full CRUD (Name, Category, Amount, Amount Unit, Company relation)
+- [x] JWT login / register
+- [x] Companies CRUD (Name, Legal Number, Incorporation Country, Website)
+- [x] Products CRUD (Name, Category, Amount, Amount Unit, Company relation)
+- [x] Dashboard with live statistics and charts
 
-**Bonuses implemented**
+**Optional / bonus**
 
-- ✅ Table sorting, filtering, searching and pagination
-- ✅ Node.js + Express backend serving all data
-- ✅ PostgreSQL with Sequelize ORM (relational schema, FK + cascade)
-- ✅ Unit & integration tests (backend and frontend)
-- ✅ JWT token authentication with hashed passwords
-- ✅ TypeScript across the entire stack
-- ✅ Extra features: live dashboard charts, dark/light theme, CSV export,
-  responsive layout, toast notifications, confirmation dialogs
+- [x] Table sorting, filtering, searching and pagination
+- [x] Node.js + Express backend with PostgreSQL + Sequelize (FK + cascade)
+- [x] Unit & integration tests (backend and frontend)
+- [x] JWT authentication with hashed passwords
+- [x] TypeScript across the entire stack
+- [x] Dark/light theme, CSV export, dashboard charts, responsive layout, toast
+  notifications, confirmation dialogs
 
 ---
 
