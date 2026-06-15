@@ -182,6 +182,17 @@ PostgreSQL is required to execute the tests**.
   cache invalidation. Mutations invalidate the relevant queries, so the dashboard and
   tables stay automatically in sync after every create/update/delete.
 
+- **Filtering, searching, sorting and pagination are done client-side** — a deliberate
+  choice for this dataset's scale. Each table loads its full collection once (cached by
+  TanStack Query) and derives the view with memoized selectors, which keeps interactions
+  instant, lets CSV export cover the full filtered set, and reuses the same in-memory
+  list for the related dropdowns (e.g. the company filter and the product form) without
+  extra round-trips. The natural path to scale is to move this work to the server:
+  `GET /products?page&pageSize&search&sort` backed by Sequelize `findAndCountAll`
+  (`limit`/`offset`/`where`/`order`) returning `{ rows, total }`, a lightweight
+  `options` endpoint for the dropdowns, and an unpaginated export route — swapped in
+  behind the existing query hooks without touching the UI components.
+
 - **JWT auth** is stored client-side and attached by an Axios interceptor; a response
   interceptor logs the user out on `401`. Routes are guarded by a `ProtectedRoute`.
 
