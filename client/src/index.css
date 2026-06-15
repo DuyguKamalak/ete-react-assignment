@@ -1,3 +1,10 @@
+/* Reset the browser's default body margin so the dark-themed AntD Layout fills the
+   viewport edge-to-edge (no ~8px light frame on the right/bottom, no stray scrollbar). */
+html,
+body {
+  margin: 0;
+}
+
 /* App chrome (header, sidebar, menu, buttons, tabs, switches) should feel like a
    native app: no text selection and a default cursor instead of the text caret.
    Data content (tables, detail descriptions, forms) stays selectable so it can be
