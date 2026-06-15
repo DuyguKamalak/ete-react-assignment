@@ -4,6 +4,10 @@
 
 **🌐 Live demo: https://ete-portal-five.vercel.app** — log in with `admin` / `admin123`
 
+> ⏳ The backend runs on a free-tier host that sleeps after inactivity, so the **very
+> first request after an idle period can take ~30–60 s** while it wakes up. The app
+> pings the API on load to start this early, and after that it's instant.
+
 A full-stack application for managing companies and their products. It features JWT
 authentication, a live statistics dashboard, and full CRUD with sorting, filtering,
 searching, pagination and CSV export.
@@ -117,9 +121,14 @@ The app is deployment-ready for a **Vercel (frontend) + Render (backend & Postgr
 - **Frontend — Vercel:** import the repo with **Root Directory = `client`**. Vite is
   detected automatically ([`client/vercel.json`](./client/vercel.json) adds SPA routing).
   Set the env var `VITE_API_URL` to the Render API URL plus `/api`.
-- **No cold starts:** the [`keep-alive`](./.github/workflows/keep-alive.yml) workflow pings
-  the backend every 10 minutes. Add a repository variable `BACKEND_URL` with the Render URL.
-  (For extra reliability you can also use a free uptime monitor.)
+- **Cold starts (free tier):** Render's free instance spins down after ~15 minutes of
+  inactivity, so the first request after an idle period takes ~30–60 s to wake the
+  container. Two mitigations reduce this: the frontend pre-warms the API with a `/health`
+  ping on load (`client/src/App.tsx`), and a [`keep-alive`](./.github/workflows/keep-alive.yml)
+  GitHub Actions workflow pings the backend every ~10 minutes (set a repository variable
+  `BACKEND_URL` to the Render URL). Note that free scheduled workflows can be delayed, so
+  an occasional cold start is still possible; a paid instance or an external uptime monitor
+  removes it entirely.
 
 ---
 
